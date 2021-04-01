@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# Build a webpage to upload images and show visual similarity of two images
 import os
 from flask import Flask, request, url_for, send_from_directory
 from werkzeug.utils import secure_filename
@@ -8,8 +8,6 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = './images'
 app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
-
-
 
 html = '''
     <!DOCTYPE html>
@@ -26,9 +24,6 @@ html = '''
     </form>
     '''
 
-
-
-
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1] in ALLOWED_EXTENSIONS
@@ -38,7 +33,7 @@ def allowed_file(filename):
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'],
                                filename)
-
+# A list to save image names for immediate computation use.
 imglist = []
 @app.route('/', methods=['GET', 'POST'])
 def upload_file():
@@ -49,7 +44,9 @@ def upload_file():
             file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
             file_url = url_for('uploaded_file', filename=filename)
             imglist.append(filename)
+            # Show the most recent upload image names. At most two names in the list. This is printing in terminal.
             print(imglist)
+            # When there are two images in the list, we compute the similarity of these two images.
             if len(imglist) == 2:
                     p1 = product()
                     p2 = product()
@@ -60,6 +57,7 @@ def upload_file():
                     result_e = p1.similarity(p2,'Euclidean')
                     result_c = p1.similarity(p2,'Cosine')
                     result_p = p1.similarity(p2,'Pearson')
+                    # Clear the list for next time use. Thus, the previous images uploaded won't affect next time computation and save compute memory.
                     imglist.clear()
                     result_e_show = '<div style="color: black; size: 14px;"> The Euclidean distance of two images is: <p style="color:red"> {} </p ></div>'.format(result_e)
                     result_c_show = '<div style="color: black; size: 14px;"> The Cosine similarity of two images is: <p style="color:red"> {} </p ></div>'.format(result_c)
@@ -68,4 +66,5 @@ def upload_file():
             return html + '<br><img src=' + file_url + '>'
     return html
 
-app.run()
+if __name__ == '__main__':
+    app.run()
