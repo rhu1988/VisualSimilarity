@@ -1,1 +1,1 @@
-"#VisualSimilarity" 
+'#VisualSimilarity' 
